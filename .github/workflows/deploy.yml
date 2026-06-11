@@ -1,0 +1,23 @@
+name: Deploy Social
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: kaduapps-social
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            cd /home/kaduapps-social/htdocs/social.kaduapps.site
+            git pull origin main
+            pnpm install --frozen-lockfile
+            pnpm build
+            pm2 reload ecosystem.config.cjs --update-env
